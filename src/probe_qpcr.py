@@ -76,7 +76,7 @@ def get_qpcr_hits(primer_name: str, forward_primer: str, reverse_primer: str, pr
     #         forward_primer, reverse_complement(reverse_primer)), sequence)]:
     #     product = sequence[match.start():match.end()]
     #     for product_match in [match for match in re.finditer(probe, product)]:
-    primer_pattern = "({}).*({}).*({})".format( forward_primer, probe, reverse_complement(reverse_primer))
+    primer_pattern = "({}).*({}).*({})".format(forward_primer, probe, reverse_complement(reverse_primer))
     for match in [match for match in re.finditer(primer_pattern, target_sequence)]:
         product = target_sequence[match.start():match.end()]
         # print("Primer set: {}".format(primer_name))
@@ -85,7 +85,9 @@ def get_qpcr_hits(primer_name: str, forward_primer: str, reverse_primer: str, pr
         # print("Product: {}".format(product))
         # print("\tStart: {}\n\tEnd: {}\n\tLength: {}".format(
         #     match.start(), match.end(), match.end() - match.start()))
-        print("{}\t{}\t{}\t{}\t{}\t{}".format(primer_name, target_name, match.start(), match.end(), match.end() - match.start(), product))
+        print("{}\t{}\t{}\t{}\t{}\t{}".format(primer_name, target_name, match.start(), match.end(),
+                                              match.end() - match.start(), product))
+
 
 def replace_ambiguity_codes(sequence: str):
     import sys
@@ -102,9 +104,11 @@ def replace_ambiguity_codes(sequence: str):
     return ''.join(regexlist)
 
 
-if __name__ == "__main__":
-    primer_dict = read_primers("../data/collected_primers.N.formatted.fa")
-    for target_name, target_sequence in read_sequences("../data/test_sequence.fa"):
+def main():
+    import sys
+    primer_file, target_file = sys.argv[1:]
+    primer_dict = read_primers(primer_file)
+    for target_name, target_sequence in read_sequences(target_file):
         for primer_set in primer_dict:
             get_qpcr_hits(primer_set,
                           primer_dict[primer_set]['F'],
@@ -112,3 +116,7 @@ if __name__ == "__main__":
                           primer_dict[primer_set]['P'],
                           target_name,
                           target_sequence)
+
+
+if __name__ == "__main__":
+    main()
