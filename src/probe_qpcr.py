@@ -59,7 +59,7 @@ def read_sequences(file_name: str):
             if line.startswith(">"):
                 if name:
                     yield name, ''.join(seq)
-                name, seq = line, []
+                name, seq = line[1:], []
             else:
                 seq.append(line)
         if name:
@@ -79,12 +79,13 @@ def get_qpcr_hits(primer_name: str, forward_primer: str, reverse_primer: str, pr
     primer_pattern = "({}).*({}).*({})".format( forward_primer, probe, reverse_complement(reverse_primer))
     for match in [match for match in re.finditer(primer_pattern, target_sequence)]:
         product = target_sequence[match.start():match.end()]
-        print("Primer set: {}".format(primer_name))
-        print("Target sequence: {}".format(target_name))
-        print("Successful hit at {}".format(match.start()))
-        print("Product: {}".format(product))
-        print("\tStart: {}\n\tEnd: {}\n\tLength: {}".format(
-            match.start(), match.end(), match.end() - match.start()))
+        # print("Primer set: {}".format(primer_name))
+        # print("Target sequence: {}".format(target_name))
+        # print("Successful hit at {}".format(match.start()))
+        # print("Product: {}".format(product))
+        # print("\tStart: {}\n\tEnd: {}\n\tLength: {}".format(
+        #     match.start(), match.end(), match.end() - match.start()))
+        print("{}\t{}\t{}\t{}\t{}\t{}".format(primer_name, target_name, match.start(), match.end(), match.end() - match.start(), product))
 
 def replace_ambiguity_codes(sequence: str):
     import sys
