@@ -1,10 +1,3 @@
-fpri = "GGGGAACTTCTCCTGCTAGAAT"
-rpri = "CAGACATTTTGCTCTCAAGCTG"
-probe = "TTGCTGCTGCTTGACAGATT"
-
-import regex
-
-
 def read_primers(file_name: str) -> dict:
     """
     Reads primers from file.
