@@ -1,7 +1,7 @@
 def read_primers(file_name: str) -> dict:
     """
     Reads primers from file.
-    Returns a nested dictionary.
+    Returns a dictionary of dictionaries of lists.
     """
     primer_dict = {}
     with open(file_name) as fin:
@@ -12,15 +12,19 @@ def read_primers(file_name: str) -> dict:
                 if name:
                     primer_dict[name][direction] = seq
                 *name, direction = line.split(".")
+                # TODO: Is there a better way to handle primer names?
                 name[0] = name[0][1:]
                 name[-1] = name[-1][:-2]
                 name = '.'.join(name)
                 seq = ""
                 if not primer_dict.get(name):
+                    # TODO: Change to dictionary of lists
                     primer_dict[name] = {'F': '', 'R': '', 'P': ''}
             else:
+                # TODO: Replace ambiguity codes
                 seq = line
         if name:
+            # TODO: Add support for lists
             primer_dict[name][direction] = seq
 
     return primer_dict
@@ -64,6 +68,7 @@ def read_sequences(file_name: str):
             yield name, ''.join(seq)
 
 
+# TODO: Change method to accept a whole dictionary entry
 def get_qpcr_hits(primer_name: str, forward_primer: str, reverse_primer: str, probe: str,
                   target_name: str, target_sequence: str):
     """
@@ -83,6 +88,7 @@ def replace_ambiguity_codes(sequence: str):
              "D": "[AGT]", "K": "[GT]", "N": "[ACGT]", "H": "[ACT]", "M": "[AC]", "V": "[ACG]", "X": "[ACGT]"}
     regexlist = []
     for base in sequence:
+        # TODO: Change to throw exceptions
         if not base in codes:
             print("Unidentified nucleotide code in primer:", base)
             sys.exit()
@@ -98,6 +104,7 @@ def main():
     primer_dict = read_primers(primer_file)
     for target_name, target_sequence in read_sequences(target_file):
         for primer_set in primer_dict:
+            # TODO: change method signature
             get_qpcr_hits(primer_set,
                           primer_dict[primer_set]['F'],
                           primer_dict[primer_set]['R'],
@@ -107,4 +114,5 @@ def main():
 
 
 if __name__ == "__main__":
+    # TODO: Change to sys.exit() syntax
     main()
