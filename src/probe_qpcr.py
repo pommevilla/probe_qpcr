@@ -10,14 +10,12 @@ def read_primers(file_name: str) -> dict:
             line = line.rstrip()
             if line.startswith(">"):
                 if name:
-                    # print('\tName: {}\n\tDirection: {}\n\tSequence: {}'.format(name, direction, seq))
                     primer_dict[name][direction] = seq
                 *name, direction = line.split(".")
                 name[0] = name[0][1:]
                 name[-1] = name[-1][:-2]
                 name = '.'.join(name)
                 seq = ""
-                # print('\tName: {}\n\tDirection: {}\n\tSequence: {}'.format(name, direction, seq))
                 if not primer_dict.get(name):
                     primer_dict[name] = {'F': '', 'R': '', 'P': ''}
             else:
@@ -72,19 +70,9 @@ def get_qpcr_hits(primer_name: str, forward_primer: str, reverse_primer: str, pr
 	Returns the TaqMan product.
 	"""
     import re
-    # for match in [match for match in re.finditer("({}).*({})".format(
-    #         forward_primer, reverse_complement(reverse_primer)), sequence)]:
-    #     product = sequence[match.start():match.end()]
-    #     for product_match in [match for match in re.finditer(probe, product)]:
     primer_pattern = "({}).*({}).*({})".format(forward_primer, probe, reverse_complement(reverse_primer))
     for match in [match for match in re.finditer(primer_pattern, target_sequence)]:
         product = target_sequence[match.start():match.end()]
-        # print("Primer set: {}".format(primer_name))
-        # print("Target sequence: {}".format(target_name))
-        # print("Successful hit at {}".format(match.start()))
-        # print("Product: {}".format(product))
-        # print("\tStart: {}\n\tEnd: {}\n\tLength: {}".format(
-        #     match.start(), match.end(), match.end() - match.start()))
         print("{}\t{}\t{}\t{}\t{}\t{}".format(primer_name, target_name, match.start(), match.end(),
                                               match.end() - match.start(), product))
 
