@@ -12,6 +12,24 @@ class UtilitiesTest(unittest.TestCase):
         sequence = 'ACZTG'
         self.assertRaises(KeyError, replace_ambiguous_bases, sequence)
 
+    def test_read_primers(self):
+        from src.probe_qpcr import read_primers, reverse_complement, replace_ambiguous_bases
+        expected = {
+            'China.ORF1ab': {
+                'F': 'CCCTGTGGGTTTTACACTTAA',
+                'R': 'ACGATTGTGCATCAGCTGA',
+                'P': 'CCGTCTGCGGTATGTGGAAAGGTTATGG',
+            },
+            'USA.2019-nCoV_N3': {
+                'F': 'GGGAGCCTTGAATACACCAAAA',
+                'R': 'TGTAGCACGATTGCAGCATTG',
+                'P': 'A[CT]CACATTGGCACCCGCAATCCTG',
+            },
+        }
+
+        actual = read_primers('data/test_primers.fa')
+        self.assertEqual(expected, actual)
+
     def test_get_qpcr_hits(self):
         primer_dict = {"Test_Primer": {
             'F': '',
