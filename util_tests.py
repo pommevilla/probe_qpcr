@@ -1,12 +1,27 @@
 import unittest
-from src import probe_qpcr
+
 
 class UtilitiesTest(unittest.TestCase):
     def test_replace_ambiguous_bases(self):
+        from src.probe_qpcr import replace_ambiguity_bases
         sequence = 'AGYTCGY'
         expected = 'AG[CT]TCG[CT]'
-        actual = probe_qpcr.replace_ambiguity_codes(sequence)
+        actual = replace_ambiguity_bases(sequence)
         self.assertEqual(expected, actual)
 
+        sequence = 'ACZTG'
+        self.assertRaises(KeyError, replace_ambiguity_bases, sequence)
+
+
+    def test_get_qpcr_hits(self):
+        primer_dict = {"Test_Primer": {
+            'F': '',
+            'R': '',
+            'P': ''
+        }}
+        expected = "something"
+        actual = "placeholder"
+
+
 if __name__ == '__main__':
-    unittest.main(verbosity=3)
+    unittest.main(verbosity=2)
