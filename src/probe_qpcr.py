@@ -18,13 +18,10 @@ def read_primers(file_name: str) -> dict:
                 name = '.'.join(name)
                 seq = ""
                 if not primer_dict.get(name):
-                    # TODO: Change to dictionary of lists
                     primer_dict[name] = {'F': '', 'R': '', 'P': ''}
             else:
-                # TODO: Replace ambiguity codes
-                seq = line
+                seq = replace_ambiguity_bases(line)
         if name:
-            # TODO: Add support for lists
             primer_dict[name][direction] = seq
 
     return primer_dict
@@ -50,10 +47,10 @@ def reverse_complement(nuc_sequence: str):
     return rev_seq
 
 
-def read_sequences(file_name: str):
+def read_sequences(file_name: str) -> iter:
     """
-	Sequence iterable 
-	"""
+    Sequence iterable
+    """
     with open(file_name) as fin:
         name, seq = None, []
         for line in fin:
@@ -70,10 +67,10 @@ def read_sequences(file_name: str):
 
 # TODO: Change method to accept a whole dictionary entry
 def get_qpcr_hits(primer_name: str, forward_primer: str, reverse_primer: str, probe: str,
-                  target_name: str, target_sequence: str):
+                  target_name: str, target_sequence: str) -> str:
     """
-	Returns the TaqMan product.
-	"""
+    Returns the TaqMan product.
+    """
     import re
     primer_pattern = "({}).*({}).*({})".format(forward_primer, probe, reverse_complement(reverse_primer))
     for match in [match for match in re.finditer(primer_pattern, target_sequence)]:
@@ -82,24 +79,21 @@ def get_qpcr_hits(primer_name: str, forward_primer: str, reverse_primer: str, pr
                                               match.end() - match.start(), product))
 
 
-def replace_ambiguity_codes(sequence: str):
-    import sys
+def replace_ambiguity_bases(sequence: str) -> str:
     codes = {"A": "A", "C": "C", "G": "G", "T": "T", "R": "[AG]", "S": "[GC]", "B": "[CGT]", "Y": "[CT]", "W": "[AT]",
              "D": "[AGT]", "K": "[GT]", "N": "[ACGT]", "H": "[ACT]", "M": "[AC]", "V": "[ACG]", "X": "[ACGT]"}
     regexlist = []
     for base in sequence:
-        # TODO: Change to throw exceptions
-        if not base in codes:
-            print("Unidentified nucleotide code in primer:", base)
-            sys.exit()
-        else:
+        try:
             regexlist.append(codes[base])
+        except KeyError:
+            print(f"Base {base} not found.")
+            raise
 
     return ''.join(regexlist)
 
 
 def main():
-    import sys
     primer_file, target_file = sys.argv[1:]
     primer_dict = read_primers(primer_file)
     for target_name, target_sequence in read_sequences(target_file):
@@ -115,4 +109,5 @@ def main():
 
 if __name__ == "__main__":
     # TODO: Change to sys.exit() syntax
-    main()
+    import sys
+    sys.exit(main())
