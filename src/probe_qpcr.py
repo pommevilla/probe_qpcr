@@ -1,7 +1,7 @@
 def read_primers(file_name: str) -> dict:
     """
     Reads primers from file.
-    Returns a nested dictionary.
+    Returns a dictionary of dictionaries of lists.
     """
     primer_dict = {}
     with open(file_name) as fin:
@@ -12,6 +12,7 @@ def read_primers(file_name: str) -> dict:
                 if name:
                     primer_dict[name][direction] = seq
                 *name, direction = line.split(".")
+                # TODO: Is there a better way to handle primer names?
                 name[0] = name[0][1:]
                 name[-1] = name[-1][:-2]
                 name = '.'.join(name)
@@ -19,7 +20,7 @@ def read_primers(file_name: str) -> dict:
                 if not primer_dict.get(name):
                     primer_dict[name] = {'F': '', 'R': '', 'P': ''}
             else:
-                seq = line
+                seq = replace_ambiguous_bases(line)
         if name:
             primer_dict[name][direction] = seq
 
@@ -46,10 +47,10 @@ def reverse_complement(nuc_sequence: str):
     return rev_seq
 
 
-def read_sequences(file_name: str):
+def read_sequences(file_name: str) -> iter:
     """
-	Sequence iterable 
-	"""
+    Sequence iterable
+    """
     with open(file_name) as fin:
         name, seq = None, []
         for line in fin:
@@ -64,11 +65,12 @@ def read_sequences(file_name: str):
             yield name, ''.join(seq)
 
 
+# TODO: Change method to accept a whole dictionary entry
 def get_qpcr_hits(primer_name: str, forward_primer: str, reverse_primer: str, probe: str,
-                  target_name: str, target_sequence: str):
+                  target_name: str, target_sequence: str) -> str:
     """
-	Returns the TaqMan product.
-	"""
+    Returns the TaqMan product.
+    """
     import re
     primer_pattern = "({}).*({}).*({})".format(forward_primer, probe, reverse_complement(reverse_primer))
     for match in [match for match in re.finditer(primer_pattern, target_sequence)]:
@@ -77,27 +79,26 @@ def get_qpcr_hits(primer_name: str, forward_primer: str, reverse_primer: str, pr
                                               match.end() - match.start(), product))
 
 
-def replace_ambiguity_codes(sequence: str):
-    import sys
+def replace_ambiguous_bases(sequence: str) -> str:
     codes = {"A": "A", "C": "C", "G": "G", "T": "T", "R": "[AG]", "S": "[GC]", "B": "[CGT]", "Y": "[CT]", "W": "[AT]",
              "D": "[AGT]", "K": "[GT]", "N": "[ACGT]", "H": "[ACT]", "M": "[AC]", "V": "[ACG]", "X": "[ACGT]"}
-    regexlist = []
+    unambiguous_sequence = []
     for base in sequence:
-        if not base in codes:
-            print("Unidentified nucleotide code in primer:", base)
-            sys.exit()
-        else:
-            regexlist.append(codes[base])
+        try:
+            unambiguous_sequence.append(codes[base])
+        except KeyError:
+            print(f"Base {base} not found.")
+            raise
 
-    return ''.join(regexlist)
+    return ''.join(unambiguous_sequence)
 
 
 def main():
-    import sys
     primer_file, target_file = sys.argv[1:]
     primer_dict = read_primers(primer_file)
     for target_name, target_sequence in read_sequences(target_file):
         for primer_set in primer_dict:
+            # TODO: change method signature
             get_qpcr_hits(primer_set,
                           primer_dict[primer_set]['F'],
                           primer_dict[primer_set]['R'],
@@ -107,4 +108,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    sys.exit(main())
