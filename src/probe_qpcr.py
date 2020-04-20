@@ -30,18 +30,14 @@ def read_primers(file_name: str) -> dict:
 def reverse_complement(nuc_sequence: str):
     """
     Returns the reverse complement of a nucleotide sequence.
-    >>> reverse_complement('ACGT')
-    'ACGT'
-    >>> reverse_complement('ATCGTGCTGCTGTCGTCAAGAC')
-    'GTCTTGACGACAGCAGCACGAT'
-    >>> reverse_complement('TGCTAGCATCGAGTCGATCGATATATTTAGCATCAGCATT')
-    'AATGCTGATGCTAAATATATCGATCGACTCGATGCTAGCA'
      """
     complements = {
         "A": "T",
         "C": "G",
         "G": "C",
-        "T": "A"
+        "T": "A",
+        '[': ']',
+        ']': '[',
     }
     rev_seq = "".join([complements[s] for s in nuc_sequence[::-1]])
     return rev_seq
