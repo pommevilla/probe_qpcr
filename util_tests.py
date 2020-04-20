@@ -1,4 +1,6 @@
+from io import StringIO
 import unittest
+from unittest.mock import patch
 
 
 class UtilitiesTest(unittest.TestCase):
@@ -31,13 +33,68 @@ class UtilitiesTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
     def test_get_qpcr_hits(self):
-        primer_dict = {"Test_Primer": {
-            'F': '',
-            'R': '',
-            'P': ''
-        }}
-        expected = "something"
-        actual = "placeholder"
+        from src.probe_qpcr import get_qpcr_hits
+
+        output_format_string = '{}\t{}\t{}\t{}\t{}\t{}\n'
+
+        primers = {
+            'test_primer.1': {
+                'F': 'GTACA',
+                'R': 'TTGCGG',
+                'P': 'TCCTG',
+            },
+            'test_primer.2': {
+                'F': 'TGCTGAAA',
+                'R': 'ACGAGG[CGT]',
+                'P': 'CCT[CT]TG',
+            }
+        }
+
+        test_sequences = {
+            'test_sequence.1': 'TTTAAGCTGTACAGCCCTCCTGAATGCTGTCCCCGCAATTCGA',
+            'test_sequence.2': 'AACTGCTGAAACCCTGTATCGTAGCCCTCTGTTAAGCCTAACCTCGTAGGCTA',
+        }
+
+        expected_1 = output_format_string.format('test_primer.1', 'test_sequence.1',
+                                                 8, 38, 30,
+                                                 'GTACAGCCCTCCTGAATGCTGTCCCCGCAA')
+
+        with patch('sys.stdout', new=StringIO()) as captured_output:
+            get_qpcr_hits('test_primer.1', primers['test_primer.1']['F'],
+                          primers['test_primer.1']['R'],
+                          primers['test_primer.1']['P'],
+                          'test_sequence.1',
+                          test_sequences['test_sequence.1'],
+                          )
+            self.assertEqual(expected_1, captured_output.getvalue())
+
+        expected_2 = ''
+
+        with patch('sys.stdout', new=StringIO()) as captured_output:
+            get_qpcr_hits('test_primer.2', primers['test_primer.2']['F'],
+                          primers['test_primer.2']['R'],
+                          primers['test_primer.2']['P'],
+                          'test_sequence.1',
+                          test_sequences['test_sequence.1'],
+                          )
+
+            self.assertEqual(expected_2, captured_output.getvalue())
+
+        expected_3 = output_format_string.format('test_primer.2', 'test_sequence.2',
+                                                 3, 47, 44,
+                                                 'TGCTGAAACCCTGTATCGTAGCCCTCTGTTAAGCCTAACCTCGT')
+
+        with patch('sys.stdout', new=StringIO()) as captured_output:
+            get_qpcr_hits('test_primer.2', primers['test_primer.2']['F'],
+                          primers['test_primer.2']['R'],
+                          primers['test_primer.2']['P'],
+                          'test_sequence.2',
+                          test_sequences['test_sequence.2'],
+                          )
+
+            self.assertEqual(expected_3, captured_output.getvalue())
+
+
 
     def test_reverse_complement(self):
         from src.probe_qpcr import reverse_complement
