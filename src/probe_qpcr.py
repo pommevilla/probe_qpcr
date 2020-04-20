@@ -1,22 +1,19 @@
 def read_primers(file_name: str) -> dict:
-    """
-    Reads primers from file.
-    Returns a dictionary of dictionaries of lists.
-    """
+    """ Reads primers from file. Returns a dictionary of dictionaries of lists. """
     primer_dict = {}
     with open(file_name) as fin:
-        name, seq, direction = None, "", None
+        name, seq, direction = None, '', None
         for line in fin:
             line = line.rstrip()
-            if line.startswith(">"):
+            if line.startswith('>'):
                 if name:
                     primer_dict[name][direction] = seq
-                *name, direction = line.split(".")
+                *name, direction = line.split('.')
                 # TODO: Is there a better way to handle primer names?
                 name[0] = name[0][1:]
                 name[-1] = name[-1][:-2]
                 name = '.'.join(name)
-                seq = ""
+                seq = ''
                 if not primer_dict.get(name):
                     primer_dict[name] = {'F': '', 'R': '', 'P': ''}
             else:
@@ -28,30 +25,26 @@ def read_primers(file_name: str) -> dict:
 
 
 def reverse_complement(nuc_sequence: str):
-    """
-    Returns the reverse complement of a nucleotide sequence.
-     """
+    """ Returns the reverse complement of a nucleotide sequence. """
     complements = {
-        "A": "T",
-        "C": "G",
-        "G": "C",
-        "T": "A",
+        'A': 'T',
+        'C': 'G',
+        'G': 'C',
+        'T': 'A',
         '[': ']',
         ']': '[',
     }
-    rev_seq = "".join([complements[s] for s in nuc_sequence[::-1]])
+    rev_seq = ''.join([complements[s] for s in nuc_sequence[::-1]])
     return rev_seq
 
 
 def read_sequences(file_name: str) -> iter:
-    """
-    Sequence iterable
-    """
+    """ Reads a fasta file and returns an iterable of sequence IDs and sequences """
     with open(file_name) as fin:
         name, seq = None, []
         for line in fin:
             line = line.rstrip()
-            if line.startswith(">"):
+            if line.startswith('>'):
                 if name:
                     yield name, ''.join(seq)
                 name, seq = line[1:], []
@@ -64,26 +57,25 @@ def read_sequences(file_name: str) -> iter:
 # TODO: Change method to accept a whole dictionary entry
 def get_qpcr_hits(primer_name: str, forward_primer: str, reverse_primer: str, probe: str,
                   target_name: str, target_sequence: str) -> str:
-    """
-    Returns the TaqMan product.
-    """
+    """ Returns the TaqMan product """
     import re
-    primer_pattern = "({}).*({}).*({})".format(forward_primer, probe, reverse_complement(reverse_primer))
+    primer_pattern = '({}).*({}).*({})'.format(forward_primer, probe, reverse_complement(reverse_primer))
     for match in [match for match in re.finditer(primer_pattern, target_sequence)]:
         product = target_sequence[match.start():match.end()]
-        print("{}\t{}\t{}\t{}\t{}\t{}".format(primer_name, target_name, match.start(), match.end(),
+        print('{}\t{}\t{}\t{}\t{}\t{}'.format(primer_name, target_name, match.start(), match.end(),
                                               match.end() - match.start(), product))
 
 
 def replace_ambiguous_bases(sequence: str) -> str:
-    codes = {"A": "A", "C": "C", "G": "G", "T": "T", "R": "[AG]", "S": "[GC]", "B": "[CGT]", "Y": "[CT]", "W": "[AT]",
-             "D": "[AGT]", "K": "[GT]", "N": "[ACGT]", "H": "[ACT]", "M": "[AC]", "V": "[ACG]", "X": "[ACGT]"}
+    """ Replace the ambiguous bases in a sequence according to IUPAC codes """
+    codes = {'A': 'A', 'C': 'C', 'G': 'G', 'T': 'T', 'R': '[AG]', 'S': '[GC]', 'B': '[CGT]', 'Y': '[CT]', 'W': '[AT]',
+             'D': '[AGT]', 'K': '[GT]', 'N': '[ACGT]', 'H': '[ACT]', 'M': '[AC]', 'V': '[ACG]', 'X': '[ACGT]'}
     unambiguous_sequence = []
     for base in sequence:
         try:
             unambiguous_sequence.append(codes[base])
         except KeyError:
-            print(f"Base {base} not found.")
+            print(f'Base {base} not found.')
             raise
 
     return ''.join(unambiguous_sequence)
@@ -103,6 +95,6 @@ def main():
                           target_sequence)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import sys
     sys.exit(main())
