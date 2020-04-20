@@ -1,4 +1,5 @@
 ## Probe qPCR 
+[![Build Status](https://travis-ci.com/pommevilla/probe_qpcr.svg?branch=master)](https://travis-ci.com/pommevilla/probe_qpcr)
 
 A small script to perform *in silico* qPCR of TaqMan probes.
 
