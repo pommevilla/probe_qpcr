@@ -20,7 +20,7 @@ def read_primers(file_name: str) -> dict:
                 if not primer_dict.get(name):
                     primer_dict[name] = {'F': '', 'R': '', 'P': ''}
             else:
-                seq = replace_ambiguity_bases(line)
+                seq = replace_ambiguous_bases(line)
         if name:
             primer_dict[name][direction] = seq
 
@@ -79,18 +79,18 @@ def get_qpcr_hits(primer_name: str, forward_primer: str, reverse_primer: str, pr
                                               match.end() - match.start(), product))
 
 
-def replace_ambiguity_bases(sequence: str) -> str:
+def replace_ambiguous_bases(sequence: str) -> str:
     codes = {"A": "A", "C": "C", "G": "G", "T": "T", "R": "[AG]", "S": "[GC]", "B": "[CGT]", "Y": "[CT]", "W": "[AT]",
              "D": "[AGT]", "K": "[GT]", "N": "[ACGT]", "H": "[ACT]", "M": "[AC]", "V": "[ACG]", "X": "[ACGT]"}
-    regexlist = []
+    unambiguous_sequence = []
     for base in sequence:
         try:
-            regexlist.append(codes[base])
+            unambiguous_sequence.append(codes[base])
         except KeyError:
             print(f"Base {base} not found.")
             raise
 
-    return ''.join(regexlist)
+    return ''.join(unambiguous_sequence)
 
 
 def main():
@@ -108,6 +108,5 @@ def main():
 
 
 if __name__ == "__main__":
-    # TODO: Change to sys.exit() syntax
     import sys
     sys.exit(main())
